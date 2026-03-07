@@ -10,6 +10,14 @@ export interface Options {
 
 export type EnrollOptions = Options;
 
-export type EnrollResult = { ok: true; [key: string]: unknown } | { ok: false; [key: string]: unknown };
-export type RecognizeResult = { ok: true; [key: string]: unknown } | { ok: false; [key: string]: unknown };
-export type DeleteResult = { ok: true; [key: string]: unknown } | { ok: false; [key: string]: unknown };
+export type EnrollResult =
+  | { ok: true; profileId: string; customerId?: string; customerData?: string; requestId: string }
+  | { ok: false; error: string; detail?: string; requestId?: string };
+
+export type RecognizeResult =
+  | { ok: true; profileId: string; customerId?: string; customerData?: string; requestId: string }
+  | { ok: false; error: string; detail?: string; requestId?: string };
+
+export type DeleteResult =
+  | { ok: true; profileId: string; customerId?: string; customerData?: string; requestId: string }
+  | { ok: false; error: string; detail?: string; requestId?: string };

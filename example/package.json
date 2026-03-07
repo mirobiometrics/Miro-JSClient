@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@miro/image-upload": "file:../miro-image-upload-0.1.0.tgz"
+    "@miro/image-upload": "file:../miro-image-upload-1.0.0.tgz"
   }
 }

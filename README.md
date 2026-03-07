@@ -4,12 +4,19 @@ Palm enrollment, recognition, and deletion with [Miro](https://mirobiometrics.co
 
 See [here](https://github.com/mirobiometrics/Miro-Documentation/blob/main/MIRO_API_DOCUMENTATION.md) for low-level API details.
 
+## Requirements
+
+- Images must be less than 6Mbs in size.
+- Image resolution must be between 1080x1080 and 2400x2400. Portrait images are preferred.
+- Device clock must be within a few minutes of the current server time.
+- Each request must contain a unique image. Submitting the same image multiple times will be rejected.
+
 ## Camera Recommendations
 
 For best palm capture results:
 
-- **Use back-facing camera** when available (typically on mobile devices)
-- **Front-facing cameras** are typically mirrored; set `imageMirrored: true` in `options`when using them.
+- Use back-facing camera when available (typically on mobile devices)
+- Front-facing cameras are typically mirrored; set `imageMirrored: true` in `options` when using them.
 
 
 ## Installation
@@ -40,36 +47,40 @@ const options = {
 
 ```typescript
 import { enrollImage, recognizeImage, deleteImage } from '@miro/image-upload';
+import { readFile } from 'fs/promises';
 
 // Enroll one palm
-const result = await enrollImage('/path/to/palm1.jpg');
+const palm1 = await readFile('/path/to/palm1.jpg');
+const result = await enrollImage(palm1);
 
 // Enroll one palm with customer data
-const result = await enrollImage('/path/to/palm1.jpg', undefined, 'user-123', 'encrypted-user-data');
+const result = await enrollImage(palm1, undefined, 'user-123', 'encrypted-user-data');
 
 // Enroll two palms (must be one left and one right)
-const result = await enrollImage('/path/to/palm1.jpg', '/path/to/palm2.jpg', 'user-123', 'encrypted-user-data');
+const palm2 = await readFile('/path/to/palm2.jpg');
+const result = await enrollImage(palm1, palm2, 'user-123', 'encrypted-user-data');
 
 // Recognize a palm
-const match = await recognizeImage('/path/to/palm.jpg');
+const palmBuffer = await readFile('/path/to/palm.jpg');
+const match = await recognizeImage(palmBuffer);
 if (match.ok) {
   console.log('Profile ID:', match.profileId);
   console.log('Customer ID:', match.customerId);
 }
 
 // Delete a profile by palm match
-const deleted = await deleteImage('/path/to/palm.jpg');
+const deleted = await deleteImage(palmBuffer);
 ```
 
 ## API
 
-### `enrollImage(palm1Path, palm2Path?, customerId?, customerData?, options?)`
+### `enrollImage(palm1Buffer, palm2Buffer?, customerId?, customerData?, options?)`
 
 Enroll one or two palm images and create a profile.
 
 **Parameters:**
-- `palm1Path` (string): Path to first palm image
-- `palm2Path` (string, optional): Path to second palm image (must be opposite chirality)
+- `palm1Buffer` (Buffer): First palm image buffer
+- `palm2Buffer` (Buffer, optional): Second palm image buffer (must be opposite chirality)
 - `customerId` (string, optional): Unique customer identifier
 - `customerData` (string, optional): Encrypted customer data
 - `options` (object, optional):
@@ -80,15 +91,15 @@ Enroll one or two palm images and create a profile.
 ```typescript
 { ok: true, profileId: string, customerId?: string, customerData?: string, requestId: string }
 // or
-{ ok: false, code: string, message: string, requestId?: string }
+{ ok: false, error: string, detail?: string, requestId?: string }
 ```
 
-### `recognizeImage(imagePath, options?)`
+### `recognizeImage(imageBuffer, options?)`
 
 Recognize a palm and retrieve the associated profile.
 
 **Parameters:**
-- `imagePath` (string): Path to palm image
+- `imageBuffer` (Buffer): Palm image buffer
 - `options` (object, optional):
   - `credentials`: Instance ID and secret
   - `imageMirrored`: Set to `true` if image is horizontally mirrored (e.g., front-facing camera)
@@ -97,15 +108,15 @@ Recognize a palm and retrieve the associated profile.
 ```typescript
 { ok: true, profileId: string, customerId?: string, customerData?: string, requestId: string }
 // or
-{ ok: false, code: string, message: string, requestId?: string }
+{ ok: false, error: string, detail?: string, requestId?: string }
 ```
 
-### `deleteImage(imagePath, options?)`
+### `deleteImage(imageBuffer, options?)`
 
 Delete a profile by matching a palm image.
 
 **Parameters:**
-- `imagePath` (string): Path to palm image
+- `imageBuffer` (Buffer): Palm image buffer
 - `options` (object, optional):
   - `credentials`: Instance ID and secret
   - `imageMirrored`: Set to `true` if image is horizontally mirrored (e.g., front-facing camera)
@@ -114,5 +125,5 @@ Delete a profile by matching a palm image.
 ```typescript
 { ok: true, profileId: string, customerId?: string, customerData?: string, requestId: string }
 // or
-{ ok: false, code: string, message: string, requestId?: string }
+{ ok: false, error: string, detail?: string, requestId?: string }
 ```

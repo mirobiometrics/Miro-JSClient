@@ -18,20 +18,22 @@ try {
 
   switch (command) {
     case 'enroll':
-      const palm1 = args[1];
-      const palm2 = args[2]?.endsWith('.jpg') || args[2]?.endsWith('.png') ? args[2] : undefined;
-      const customerId = palm2 ? args[3] : args[2];
-      const customerData = palm2 ? args[4] : args[3];
+      const palm1Path = args[1];
+      const palm2Path = args[2]?.endsWith('.jpg') || args[2]?.endsWith('.png') ? args[2] : undefined;
+      const customerId = palm2Path ? args[3] : args[2];
+      const customerData = palm2Path ? args[4] : args[3];
       
-      result = await enrollImage(palm1, palm2, customerId, customerData);
+      const palm1Buffer = readFileSync(palm1Path);
+      const palm2Buffer = palm2Path ? readFileSync(palm2Path) : undefined;
+      result = await enrollImage(palm1Buffer, palm2Buffer, customerId, customerData);
       break;
 
     case 'recognize':
-      result = await recognizeImage(args[1]);
+      result = await recognizeImage(readFileSync(args[1]));
       break;
 
     case 'delete':
-      result = await deleteImage(args[1]);
+      result = await deleteImage(readFileSync(args[1]));
       break;
 
     default:

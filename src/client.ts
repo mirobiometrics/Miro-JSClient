@@ -10,9 +10,9 @@ export function getCredentials(options: Options): Credentials | null {
   return instanceId && secret ? { instanceId, secret } : null;
 }
 
-export async function fetchRsaKey(): Promise<{ ok: true; key: CryptoKey } | { ok: false; code: string; message: string }> {
+export async function fetchRsaKey(): Promise<{ ok: true; key: CryptoKey } | { ok: false; error: string; detail?: string }> {
   const res = await fetch(`${BASE_URL}/api/key-exchange/rsa`, { cache: 'no-store' });
-  if (!res.ok) return { ok: false, code: String(res.status), message: 'Failed to fetch RSA key' };
+  if (!res.ok) return { ok: false, error: String(res.status), detail: 'Failed to fetch RSA key' };
   const text = await res.text();
   const pem = text.trim().startsWith('-----BEGIN') ? text : (JSON.parse(text) as { publicKey: string }).publicKey;
   return { ok: true, key: await importRsaKey(pem) };
